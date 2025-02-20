@@ -8,6 +8,7 @@ use App\Http\Controllers\StokBarangController;
 use App\Http\Controllers\PencatatanNomorController;
 use App\Http\Controllers\InventarisController;
 use App\Http\Controllers\RiwayatKondisiController;
+use App\Http\Controllers\ATKController;
 use App\Http\Kernel;
 
 Route::get('/debug-kernel', function () {
@@ -57,6 +58,16 @@ Route::middleware(['auth'])->group(function () {
 
         // **Riwayat Kondisi**
         Route::get('/riwayat-kondisi', [RiwayatKondisiController::class, 'index'])->name('riwayat.kondisi');
+
+        //permintan atk
+        Route::get('/atk', [ATKController::class, 'index'])->name('atk.form');
+        Route::post('/atk/store', [ATKController::class, 'store'])->name('atk.store');
+        Route::get('/export-pdf', [ATKController::class, 'exportPDF'])->name('export.pdf');
+        Route::get('/export-pdf-file', [ATKController::class, 'exportPDFFile'])->name('export.pdfFile');
+        Route::get('/print-atk', [ATKController::class, 'printPermintaan'])->name('print');
+        Route::get('/printcheck', function () {
+            return view('pdf.print'); // Ganti 'print' dengan nama view yang sesuai
+        })->name('print.check');
     });
 
     // **Super Admin Only**

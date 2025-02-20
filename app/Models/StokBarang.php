@@ -11,7 +11,16 @@ class StokBarang extends Model
 
     protected $table = 'stok_barangs';
     protected $fillable = ['nama_barang', 'stok', 'satuan'];
-
+    
+    public function kurangiStok($jumlah) {
+        if ($this->stok >= $jumlah) {
+            $this->stok -= $jumlah;
+            $this->save();
+            return true;
+        }
+        return false; // Jika stok tidak cukup
+    }
+    
     public function jenisBarang()
     {
         return $this->belongsTo(JenisBarang::class, 'nama_barang', 'nama_barang');

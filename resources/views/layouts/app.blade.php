@@ -1,3 +1,6 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -42,6 +45,7 @@
             color: #fff;
         }
     </style>
+    @yield('css')
 </head>
 <body>
     <?php
@@ -77,6 +81,9 @@
                         <li><a class="dropdown-item" href="<?php echo $url; ?>/riwayat-kondisi"><i class="fa-solid fa-history"></i> Riwayat Pemeliharaan</a></li>
                     </ul>
                 </div>
+                <a href="{{ url('/atk') }}" class="btn btn-primary">
+                    <i class="bi bi-clipboard-plus"></i> Permintaan ATK
+                </a>
                 <a href="<?php echo $url; ?>/rekap"><i class="fa-solid fa-file-excel"></i> Rekap</a>
                 <a href="<?php echo $url; ?>/users"><i class="fa-solid fa-users"></i> Kelola User</a>
                 @endif
