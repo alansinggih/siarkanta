@@ -48,19 +48,27 @@
     @yield('css')
 </head>
 <body>
-    <?php
-     $currentUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-     $split = explode("/",$currentUrl)[3];
-     $url = $split == "siarkanta" ? "/siarkanta" :"";
-    ?>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-3 col-lg-2 d-md-block sidebar">
                 <h4 class="text-white text-center">SIARKANTA</h4>
-                <a href="<?php echo $url; ?>/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="{{ getBaseUrl() }}/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                 @if(in_array(Auth::user()->role, ['user', 'superadmin']))
-                <a href="<?php echo $url; ?>/nomor-surat"><i class="fa-solid fa-envelope"></i> Nomor Surat</a>
+                <a href="{{ getBaseUrl() }}/nomor-surat"><i class="fa-solid fa-envelope"></i> Nomor Surat</a>
+                @endif
+                @if(in_array(Auth::user()->role, ['admin', 'superadmin','atk']))
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                        <i class="fa-solid fa-box"></i> Permintaan ATK
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/atk"><i class="fa-solid fa-plus"></i> Form Pengajuan ATK</a></li>
+                        @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/print-atk"><i class="fa-solid fa-history"></i> Riwayat Permintan ATK</a></li>
+                        @endif
+                    </ul>
+                </div>
                 @endif
                 @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
                 <div class="dropdown">
@@ -68,8 +76,8 @@
                         <i class="fa-solid fa-box"></i> Stok Barang
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?php echo $url; ?>/stok-barang"><i class="fa-solid fa-plus"></i> Input Stok Barang</a></li>
-                        <li><a class="dropdown-item" href="<?php echo $url; ?>/riwayat-stok"><i class="fa-solid fa-history"></i> Riwayat</a></li>
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/stok-barang"><i class="fa-solid fa-plus"></i> Input Stok Barang</a></li>
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/riwayat-stok"><i class="fa-solid fa-history"></i> Riwayat</a></li>
                     </ul>
                 </div>
                 <div class="dropdown">
@@ -77,15 +85,12 @@
                         <i class="fa-solid fa-box"></i> Data BMN
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?php echo $url; ?>/inventaris"><i class="fa-solid fa-plus"></i> Inventaris</a></li>
-                        <li><a class="dropdown-item" href="<?php echo $url; ?>/riwayat-kondisi"><i class="fa-solid fa-history"></i> Riwayat Pemeliharaan</a></li>
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/inventaris"><i class="fa-solid fa-plus"></i> Inventaris</a></li>
+                        <li><a class="dropdown-item" href="{{ getBaseUrl() }}/riwayat-kondisi"><i class="fa-solid fa-history"></i> Riwayat Pemeliharaan</a></li>
                     </ul>
                 </div>
-                <a href="{{ url('/atk') }}" class="btn btn-primary">
-                    <i class="bi bi-clipboard-plus"></i> Permintaan ATK
-                </a>
-                <a href="<?php echo $url; ?>/rekap"><i class="fa-solid fa-file-excel"></i> Rekap</a>
-                <a href="<?php echo $url; ?>/users"><i class="fa-solid fa-users"></i> Kelola User</a>
+                <a href="{{ getBaseUrl() }}/rekap"><i class="fa-solid fa-file-excel"></i> Rekap</a>
+                <a href="{{ getBaseUrl() }}/users"><i class="fa-solid fa-users"></i> Kelola User</a>
                 @endif
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                     @csrf
@@ -94,14 +99,12 @@
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </a>
             </nav>
-
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
                 @yield('content')
             </main>
         </div>
     </div>
-
     <!-- Bootstrap JS -->
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

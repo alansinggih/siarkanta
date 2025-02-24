@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relasi dengan tabel users
             $table->foreignId('stok_barang_id')->constrained('stok_barangs')->onDelete('cascade'); // Relasi dengan stok_barangs
-            $table->enum('aksi', ['tambah', 'kurangi','tambah barang baru']); // Aksi yang dilakukan
+            $table->enum('aksi', ['tambah', 'kurangi','tambah barang baru','request']); // Aksi yang dilakukan
             $table->integer('jumlah'); // Jumlah yang ditambah atau dikurangi
             $table->timestamps(); // Waktu aksi dilakukan
         });

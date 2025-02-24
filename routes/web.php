@@ -20,6 +20,10 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+Route::get('/atk', function () {
+    return view('atk.form'); // Ganti dengan tampilan yang sesuai
+})->middleware(['auth']);
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -39,6 +43,15 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/nomor-surat/{id}', [PencatatanNomorController::class, 'update'])->name('pencatatan.nomor.update');
     });
 
+
+    Route::middleware('role:admin,atk,superadmin')->group(function () {
+        //permintan atk
+        Route::get('/atk', [ATKController::class, 'index'])->name('atk.form');
+        Route::post('/atk/store', [ATKController::class, 'store'])->name('atk.store');
+        Route::get('/export-pdf', [ATKController::class, 'exportPDF'])->name('export.pdf');
+        Route::get('/export-pdf-file', [ATKController::class, 'exportPDFFile'])->name('export.pdfFile');
+    });
+    
     // **Admin & Super Admin (Tidak Bisa Akses Pencatatan Nomor)**
     Route::middleware('role:admin,superadmin')->group(function () {
         Route::get('/manage-items', [DashboardController::class, 'manageItems']);
@@ -56,18 +69,14 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/inventaris/{inventaris}', [InventarisController::class, 'update'])->name('inventaris.update');
         Route::get('/inventaris/{hashid}', [InventarisController::class, 'show'])->name('inventaris.show');
 
-        // **Riwayat Kondisi**
-        Route::get('/riwayat-kondisi', [RiwayatKondisiController::class, 'index'])->name('riwayat.kondisi');
-
-        //permintan atk
-        Route::get('/atk', [ATKController::class, 'index'])->name('atk.form');
-        Route::post('/atk/store', [ATKController::class, 'store'])->name('atk.store');
-        Route::get('/export-pdf', [ATKController::class, 'exportPDF'])->name('export.pdf');
-        Route::get('/export-pdf-file', [ATKController::class, 'exportPDFFile'])->name('export.pdfFile');
-        Route::get('/print-atk', [ATKController::class, 'printPermintaan'])->name('print');
+        // **atk**
+        Route::get('/print-atk', [ATKController::class, 'printPermintaan'])->name('print.view');
         Route::get('/printcheck', function () {
             return view('pdf.print'); // Ganti 'print' dengan nama view yang sesuai
         })->name('print.check');
+
+        // **Riwayat Kondisi**
+        Route::get('/riwayat-kondisi', [RiwayatKondisiController::class, 'index'])->name('riwayat.kondisi');
     });
 
     // **Super Admin Only**

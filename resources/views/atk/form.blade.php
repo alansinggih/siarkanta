@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
+
 @extends('layouts.app')
 @section('css')
 <style>
@@ -25,7 +29,20 @@
         @csrf
         <div class="mb-3">
             <label class="form-label">Bagian / Bidang</label>
-            <input type="text" class="form-control" name="bagian" required>
+            @if(Auth::user()->role === 'atk')
+                <input type="text" class="form-control" name="bagian" value="{{ Auth::user()->name }}" readonly required>
+            @else
+                <select class="form-control" name="bagian" required>
+                    <option value="">-- Pilih Bagian --</option>
+                    <option value="Umum">Umum</option>
+                    <option value="Keuangan">Keuangan</option>
+                    <option value="Binadik">Binadik</option>
+                    <option value="Registrasi">Registrasi</option>
+                    <option value="Bimkemaswat">Bimkemaswat</option>
+                    <option value="KPLP">KPLP</option>
+                    <option value="Kamtib">Kamtib</option>
+                </select>
+            @endif
         </div>
 
         <div class="mb-3">
@@ -71,7 +88,8 @@
             </tbody>
         </table>
 
-        <button type="submit" id="exportPdfBtn" class="btn btn-primary btn-Simpan">Simpan</button>
+        <button type="submit" class="btn btn-primary btn-Simpan">Simpan</button>
+        <input type="button" value="Lihat" id="exportPdfBtn" class="btn btn-primary btn-Simpan"\>
 
     </form>
 </div>
@@ -88,6 +106,7 @@
             </div>
             <div class="modal-footer">
                 <a id="exportPDF" href="#" class="btn btn-danger">Download PDF</a>
+                <button type="button" class="btn btn-primary" id="printPDF">Print</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
@@ -100,31 +119,45 @@
 <script>
 $(document).ready(function() {
 
+    $("#printPDF").click(function () {
+        let iframe = document.getElementById("pdfFrame").contentWindow;
+        iframe.focus();
+        iframe.print(); // Memanggil window.print() di dalam iframe
+    });
+
     $('.btn-Simpan').click(function(){
-        $("select, input").prop('disabled', 'disabled');;
+       // $("select, input").prop('disabled', 'disabled');;
     })
     // export pdf
     $("#exportPDF").click(function() {
-            let barangData = [];
+        let barangData = [];
 
-            // Ambil data dari tabel
-            $("#atkTable tbody tr").each(function() {
-                let namaBarang = $(this).find(".nama-barang option:selected").text().trim();
-                let satuan = $(this).find(".satuan").val();
-                let jumlah = $(this).find(".jumlah").val();
-                let namaBarang1 = namaBarang.split("(")[0];
+        // Ambil data dari tabel
+        $("#atkTable tbody tr").each(function() {
+            let namaBarang = $(this).find(".nama-barang option:selected").text().trim();
+            let satuan = $(this).find(".satuan").val();
+            let jumlah = $(this).find(".jumlah").val();
+            let namaBarang1 = namaBarang.split("(")[0];
 
-                barangData.push({
-                    nama_barang: namaBarang1,
-                    satuan: satuan,
-                    jumlah: jumlah
-                });
+            barangData.push({
+                nama_barang: namaBarang1,
+                satuan: satuan,
+                jumlah: jumlah
             });
-
-            // Encode data ke URL dan arahkan ke halaman export
-            let url = "{{ route('export.pdfFile') }}?barang=" + encodeURIComponent(JSON.stringify(barangData));
-            window.location.href = url;
         });
+
+        // Ambil data bagian dan tanggal
+        let bagian = $("input[name='bagian']").val() || $("select[name='bagian']").val();
+        let tanggalInput = $("input[name='tanggal']").val();
+        let tanggalFormatted = formatTanggal(tanggalInput);
+
+
+        // Encode data ke URL dan arahkan ke halaman export
+        let url = "{{ route('export.pdfFile') }}?barang=" + encodeURIComponent(JSON.stringify(barangData)) + 
+              "&bagian=" + encodeURIComponent(bagian) + 
+              "&tanggal=" + encodeURIComponent(tanggalFormatted);
+        window.location.href = url;
+    });
 
     $("#exportPdfBtn").click(function() {
         // Ambil semua data barang dari tabel
@@ -144,10 +177,16 @@ $(document).ready(function() {
             alert("Pilih minimal satu barang!");
             return;
         }
+        // Ambil data bagian dan tanggal
+        let bagian = $("input[name='bagian']").val() || $("select[name='bagian']").val();
+        let tanggalInput = $("input[name='tanggal']").val();
+        let tanggalFormatted = formatTanggal(tanggalInput);
 
         // Encode barang ke URL parameter
-        let barangJson = encodeURIComponent(JSON.stringify(barang));
-        let pdfUrl = "/export-pdf?barang=" + barangJson;
+        let barangJson = encodeURIComponent(JSON.stringify(barang)) + 
+              "&bagian=" + encodeURIComponent(bagian) + 
+              "&tanggal=" + encodeURIComponent(tanggalFormatted);
+        let pdfUrl = "{{ getBaseUrl() }}/export-pdf?barang=" + barangJson;
 
         // Tampilkan preview PDF di modal
         $("#pdfFrame").attr("src", pdfUrl); // Download PDF setelah preview
@@ -246,6 +285,18 @@ $(document).ready(function() {
 
     // Jalankan saat pertama kali halaman dimuat
     updateDeleteButtons();
+
+    //fungsi tanggal
+        // Fungsi untuk format tanggal ke: 21 Februari 2025
+    function formatTanggal(dateString) {
+        if (!dateString) return "";
+        let months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        let date = new Date(dateString);
+        let day = date.getDate();
+        let month = months[date.getMonth()];
+        let year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+    }
 });
 </script>
 @endsection
